@@ -1,0 +1,242 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+  Pedro OS design system — OKLCH cool-slate palette.
+  Light theme only (V1). Dark deferred to a follow-up sprint.
+  --accent (blue, hue 250) is the brand color. --surface-2 is the hover/active background.
+  Density is hardcoded to 'comfortable' (no UI for tweaks in V1).
+*/
+
+@theme inline {
+  /* shadcn semantic tokens (existing components rely on these) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* New design tokens — usable as Tailwind utilities (bg-surface, text-text-3, etc.) */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-text-4: var(--text-4);
+  --color-border-strong: var(--border-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-tint: var(--accent-tint);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-freeze: var(--freeze);
+  --color-freeze-soft: var(--freeze-soft);
+
+  /* Habit heatmap intensity ramp (bg-heat-0 … bg-heat-4) */
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+
+  --color-area-professional: var(--area-professional);
+  --color-area-pro: var(--area-pro);
+  --color-area-health: var(--area-health);
+  --color-area-family: var(--area-family);
+  --color-area-marriage: var(--area-marriage);
+  --color-area-cross: var(--area-cross);
+
+  /* 4/6/8/12 sharp radius scale */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  --font-sans: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-inconsolata), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-display);
+}
+
+:root {
+  /* Cool slate palette */
+  --background: oklch(98.5% 0.004 240);
+  --surface: oklch(100% 0 0);
+  --surface-2: oklch(97% 0.005 240);
+  --border: oklch(92% 0.006 240);
+  --border-strong: oklch(86% 0.008 240);
+  --text: oklch(22% 0.015 250);
+  --text-2: oklch(45% 0.012 250);
+  --text-3: oklch(62% 0.01 250);
+  --text-4: oklch(75% 0.008 240);
+
+  /* Design accent — blue, hue 250 */
+  --accent: oklch(55% 0.09 250);
+  --accent-soft: oklch(94% 0.025 250);
+  --accent-tint: oklch(97% 0.012 250);
+  --accent-foreground: oklch(99% 0 0);
+
+  /* Semantic */
+  --success: oklch(58% 0.12 150);
+  --success-soft: oklch(95% 0.04 150);
+  --danger: oklch(58% 0.18 25);
+  --danger-soft: oklch(96% 0.04 25);
+  --freeze: oklch(72% 0.13 70);
+  --freeze-soft: oklch(96% 0.06 70);
+
+  /* Habit heatmap ramp — green hue 150, matching --success. L0 reads as "nothing". */
+  --heat-0: oklch(95% 0.004 240);
+  --heat-1: oklch(88% 0.055 150);
+  --heat-2: oklch(78% 0.095 150);
+  --heat-3: oklch(66% 0.125 150);
+  --heat-4: oklch(54% 0.135 150);
+
+  /* shadcn aliases — point to design tokens */
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-3);
+  --destructive: var(--danger);
+  --input: var(--border);
+  --ring: var(--accent);
+
+  /* Area colors (Insights chips, habit dots) */
+  --area-professional: var(--accent);
+  --area-pro: var(--accent);
+  --area-health: oklch(58% 0.13 150);
+  --area-family: oklch(60% 0.13 30);
+  --area-marriage: oklch(58% 0.16 350);
+  --area-cross: oklch(58% 0.14 290);
+
+  /* Density — hardcoded comfortable (no UI tweaks in V1) */
+  --row-h: 42px;
+  --row-fs: 14px;
+  --row-px: 14px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px oklch(20% 0.02 250 / 0.04);
+  --shadow-md: 0 1px 3px oklch(20% 0.02 250 / 0.06), 0 4px 12px oklch(20% 0.02 250 / 0.04);
+  --shadow-lg: 0 6px 24px oklch(20% 0.02 250 / 0.06);
+
+  --radius: 8px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .label-micro {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .label-uppercase {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+}
+
+/* Keep wide/imported tables inside their own horizontal scroll area. Auto
+   layout honors cell minimums even when an older document saved a 25px column;
+   fixed layout ignores those minimums and wraps text one character per line.
+   Only target TipTap's plain tables, not the embedded database grids. */
+.tiptap-editor .tableWrapper {
+  width: 100%;
+  max-width: 100%;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+.tiptap-editor .tableWrapper > table {
+  width: 100%;
+  table-layout: auto;
+}
+.tiptap-editor .tableWrapper > table > :is(thead, tbody, tfoot) > tr > :is(th, td) {
+  min-width: 160px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Checkbox task lists in the notes editor (TaskList/TaskItem, notes mode).
+   Scoped to .tiptap-editor — the EditorContent wrapper. Kept as real CSS rather
+   than inline [&_…] utilities because the attribute + child-combinator selectors
+   are clearer here. */
+.tiptap-editor ul[data-type='taskList'] {
+  list-style: none;
+  margin: 0.75rem 0;
+  padding: 0;
+}
+.tiptap-editor ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+.tiptap-editor ul[data-type='taskList'] li > label {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  user-select: none;
+}
+.tiptap-editor ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tiptap-editor ul[data-type='taskList'] li > div > p {
+  margin: 0;
+}
+.tiptap-editor ul[data-type='taskList'] input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+.tiptap-editor ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--text-3);
+  text-decoration: line-through;
+}

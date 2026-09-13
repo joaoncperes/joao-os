@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pedro-os-cron",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "vars": {
+    "PEDRO_USER_EMAIL": "you@example.com"
+  }
+  // Secrets to set via `wrangler secret put`:
+  //   SUPABASE_URL
+  //   SUPABASE_SERVICE_ROLE_KEY
+  //   VAPID_PUBLIC_KEY
+  //   VAPID_PRIVATE_KEY
+  //   VAPID_CONTACT  (mailto:you@example.com)
+}
