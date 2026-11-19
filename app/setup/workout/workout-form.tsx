@@ -51,7 +51,7 @@ export function WorkoutForm({ initialSplit, dayLabels }: Props) {
         ))}
       </div>
       <p className="text-muted-foreground text-xs">
-        Per-exercise edits live in Settings. Sprint 0 commits the default sets per Pedro&apos;s
+        Per-exercise edits live in Settings. Sprint 0 commits the default sets per João&apos;s
         spec.
       </p>
       <div className="pt-2">
