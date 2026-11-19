@@ -11,7 +11,7 @@ import { VolumeProgression } from './volume-progression';
 import { CardioCalories } from './cardio-calories';
 import type { Area, CardioWeeklyRow, VolumeSessionRow } from '@/lib/supabase/types';
 
-export const metadata = { title: 'Insights — Pedro OS' };
+export const metadata = { title: 'Insights — João OS' };
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 

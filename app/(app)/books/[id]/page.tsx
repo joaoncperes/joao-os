@@ -22,7 +22,7 @@ export async function generateMetadata({
     .eq('id', id)
     .maybeSingle();
   return {
-    title: data?.title ? `${data.title} — Pedro OS` : 'Book — Pedro OS',
+    title: data?.title ? `${data.title} — João OS` : 'Book — João OS',
   };
 }
 

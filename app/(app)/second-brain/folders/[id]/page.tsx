@@ -19,7 +19,7 @@ export async function generateMetadata({
     .eq('id', id)
     .maybeSingle();
   const title = (data as { title?: string } | null)?.title;
-  return { title: title ? `${title} — Second Brain — Pedro OS` : 'Pasta — Pedro OS' };
+  return { title: title ? `${title} — Second Brain — João OS` : 'Pasta — João OS' };
 }
 
 export default async function FolderPage({

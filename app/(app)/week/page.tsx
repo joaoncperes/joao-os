@@ -3,7 +3,7 @@ import { todayInTz, sundayWeekStart, addDays } from '@/lib/date';
 import type { WeeklyHabitSummary, Area } from '@/lib/supabase/types';
 import { WeekClient, type HabitContextRow, type PriorityRow } from './week-client';
 
-export const metadata = { title: 'Week — Pedro OS' };
+export const metadata = { title: 'Week — João OS' };
 
 export default async function WeekPage({
   searchParams,

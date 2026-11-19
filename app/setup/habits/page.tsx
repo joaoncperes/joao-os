@@ -3,7 +3,7 @@ import { DEFAULT_HABITS } from '@/lib/seed';
 import { SetupProgress } from '../setup-progress';
 import { HabitsForm } from './habits-form';
 
-export const metadata = { title: 'Habits — Pedro OS' };
+export const metadata = { title: 'Habits — João OS' };
 
 export default function HabitsPage() {
   return (

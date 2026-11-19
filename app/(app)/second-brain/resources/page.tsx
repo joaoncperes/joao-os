@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { CategoryShell } from '../category-shell';
 
-export const metadata = { title: 'Resources — Second Brain — Pedro OS' };
+export const metadata = { title: 'Resources — Second Brain — João OS' };
 export const dynamic = 'force-dynamic';
 
 export default async function ResourcesPage() {

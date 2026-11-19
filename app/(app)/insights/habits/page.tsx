@@ -6,7 +6,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { HabitHeatmapClient, type HabitMeta } from './heatmap-client';
 import type { Area } from '@/lib/supabase/types';
 
-export const metadata = { title: 'Habit year — Pedro OS' };
+export const metadata = { title: 'Habit year — João OS' };
 export const dynamic = 'force-dynamic';
 
 const WEEKS = 53;

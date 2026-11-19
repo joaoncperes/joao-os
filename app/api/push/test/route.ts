@@ -18,7 +18,7 @@ export async function POST() {
     user_id: user.id,
     kind: 'habit_reminder',
     scheduled_for: fireAt.toISOString(),
-    payload: { title: 'Pedro OS test', body: 'Push pipeline OK.', tag: 'test' },
+    payload: { title: 'João OS test', body: 'Push pipeline OK.', tag: 'test' },
   });
 
   if (error) {

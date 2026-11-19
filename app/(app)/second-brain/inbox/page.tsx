@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { InboxClient, type InboxNote } from './inbox-client';
 import type { Folder } from '@/lib/supabase/types';
 
-export const metadata = { title: 'Inbox — Second Brain — Pedro OS' };
+export const metadata = { title: 'Inbox — Second Brain — João OS' };
 export const dynamic = 'force-dynamic';
 
 export default async function InboxPage() {

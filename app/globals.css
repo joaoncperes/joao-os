@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 /*
-  Pedro OS design system — OKLCH cool-slate palette.
+  João OS design system — OKLCH cool-slate palette.
   Light theme only (V1). Dark deferred to a follow-up sprint.
   --accent (blue, hue 250) is the brand color. --surface-2 is the hover/active background.
   Density is hardcoded to 'comfortable' (no UI for tweaks in V1).

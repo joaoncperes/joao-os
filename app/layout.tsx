@@ -25,7 +25,7 @@ const inconsolata = Inconsolata({
 });
 
 export const metadata: Metadata = {
-  title: 'Pedro OS',
+  title: 'João OS',
   description: 'Personal operating system.',
 };
 

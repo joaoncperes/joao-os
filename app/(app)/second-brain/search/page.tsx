@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { listBrainTags } from '../actions';
 import { SearchClient } from './search-client';
 
-export const metadata = { title: 'Buscar — Second Brain — Pedro OS' };
+export const metadata = { title: 'Buscar — Second Brain — João OS' };
 export const dynamic = 'force-dynamic';
 
 export default async function SearchPage({

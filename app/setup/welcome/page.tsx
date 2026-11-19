@@ -3,7 +3,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SetupProgress } from '../setup-progress';
 
-export const metadata = { title: 'Welcome — Pedro OS' };
+export const metadata = { title: 'Welcome — João OS' };
 
 export default function WelcomePage() {
   return (
@@ -11,7 +11,7 @@ export default function WelcomePage() {
       <SetupProgress step="welcome" />
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to Pedro OS</CardTitle>
+          <CardTitle>Welcome to João OS</CardTitle>
           <CardDescription>The operational layer for your Personal OS.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -4,7 +4,7 @@ import type { ArticleListItem } from '@/lib/supabase/types';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { BlogClient } from './blog-client';
 
-export const metadata = { title: 'Blog — Pedro OS' };
+export const metadata = { title: 'Blog — João OS' };
 export const dynamic = 'force-dynamic';
 
 // List projection — never select the heavy content_json/content_md columns.

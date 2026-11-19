@@ -35,7 +35,7 @@ export function Sidebar({ pendingJournal, pendingWorkout, pendingWeek }: Props =
   return (
     <aside className="bg-surface border-border hidden h-screen w-60 shrink-0 flex-col gap-7 border-r px-4 py-6 lg:sticky lg:top-0 lg:flex">
       <div className="px-2">
-        <div className="text-text text-[15px] font-semibold tracking-[-0.01em]">Pedro OS</div>
+        <div className="text-text text-[15px] font-semibold tracking-[-0.01em]">João OS</div>
         <div className="text-text-3 mt-0.5 text-xs">Personal operating system</div>
       </div>
       <nav>
@@ -109,12 +109,12 @@ export function Sidebar({ pendingJournal, pendingWorkout, pendingWeek }: Props =
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icons/icon-192.png"
-          alt="Pedro"
+          alt="João"
           className="h-7 w-7 shrink-0 rounded-full object-cover"
         />
 
         <div className="leading-tight">
-          <div className="text-text text-[13px] font-medium">Pedro</div>
+          <div className="text-text text-[13px] font-medium">João</div>
           <div className="text-text-3 text-[11.5px]">São Paulo, BR</div>
         </div>
       </Link>

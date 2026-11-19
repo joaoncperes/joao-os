@@ -8,7 +8,7 @@ import {
   type DayTab,
 } from './workout-client';
 
-export const metadata = { title: 'Workout — Pedro OS' };
+export const metadata = { title: 'Workout — João OS' };
 
 const SHORT_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const FULL_DAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

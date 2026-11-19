@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { SetupProgress } from '../setup-progress';
 import { AccountForm } from './account-form';
 
-export const metadata = { title: 'Account — Pedro OS' };
+export const metadata = { title: 'Account — João OS' };
 
 export default async function AccountPage() {
   const supabase = await createClient();
@@ -30,7 +30,7 @@ export default async function AccountPage() {
         <CardContent>
           <AccountForm
             email={profile?.email ?? user.email ?? ''}
-            name={profile?.name ?? 'Pedro'}
+            name={profile?.name ?? 'João'}
             timeZone={profile?.time_zone ?? 'America/Sao_Paulo'}
             weekStartDay={profile?.week_start_day ?? 1}
           />

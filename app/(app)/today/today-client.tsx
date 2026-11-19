@@ -203,7 +203,7 @@ export function TodayClient({
       <header className="flex flex-wrap items-end justify-between gap-6">
         <div className="min-w-[240px]">
           <div className="text-text-3 mb-1.5 text-[13px] font-medium uppercase tracking-[0.02em]">
-            {isToday ? `${greeting(hour)}, Pedro` : 'Editando dia anterior'}
+            {isToday ? `${greeting(hour)}, João` : 'Editando dia anterior'}
           </div>
           <div className="flex items-center gap-1.5">
             <Link

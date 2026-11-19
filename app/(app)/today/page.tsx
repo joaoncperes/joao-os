@@ -16,7 +16,7 @@ type ReadingBook = Pick<
   'id' | 'title' | 'author' | 'why' | 'categories' | 'started_at'
 >;
 
-export const metadata = { title: 'Today — Pedro OS' };
+export const metadata = { title: 'Today — João OS' };
 
 // Force the route to re-render on every request so the quote rotates and the
 // ?date= navigation always reflects fresh data.

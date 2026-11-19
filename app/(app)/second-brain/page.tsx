@@ -12,7 +12,7 @@ import {
 import type { ParaCategory } from '@/lib/supabase/types';
 import { cn } from '@/lib/utils';
 
-export const metadata = { title: 'Second Brain — Pedro OS' };
+export const metadata = { title: 'Second Brain — João OS' };
 export const dynamic = 'force-dynamic';
 
 export default async function SecondBrainPage() {

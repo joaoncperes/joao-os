@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { CustomReminder } from '@/lib/supabase/types';
 import { NotificationsClient } from './notifications-client';
 
-export const metadata = { title: 'Notifications — Pedro OS' };
+export const metadata = { title: 'Notifications — João OS' };
 export const dynamic = 'force-dynamic';
 
 interface SubscriptionRow {

@@ -3,7 +3,7 @@ import { DAY_OF_WEEK_LABELS, DEFAULT_SPLIT } from '@/lib/seed';
 import { SetupProgress } from '../setup-progress';
 import { WorkoutForm } from './workout-form';
 
-export const metadata = { title: 'Workout split — Pedro OS' };
+export const metadata = { title: 'Workout split — João OS' };
 
 export default function WorkoutPage() {
   return (

@@ -6,7 +6,7 @@ import {
   type MeditationLogRow,
 } from './meditation-client';
 
-export const metadata = { title: 'Meditation — Pedro OS' };
+export const metadata = { title: 'Meditation — João OS' };
 
 const SHORT_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const FULL_DAY = [

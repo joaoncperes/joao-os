@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { todayInTz, addDays } from '@/lib/date';
 import { JournalClient, type JournalRow, type PastRow } from './journal-client';
 
-export const metadata = { title: 'Journal — Pedro OS' };
+export const metadata = { title: 'Journal — João OS' };
 
 // Re-render on every request so ?date= navigation always reflects fresh data.
 export const dynamic = 'force-dynamic';

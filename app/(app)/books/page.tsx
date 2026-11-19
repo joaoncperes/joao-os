@@ -6,7 +6,7 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { BooksClient } from './books-client';
 import { todayInTz } from '@/lib/date';
 
-export const metadata = { title: 'Books — Pedro OS' };
+export const metadata = { title: 'Books — João OS' };
 export const dynamic = 'force-dynamic';
 
 // Grade comes from the URL (?grade=8). Accept only an integer in 0–10; anything

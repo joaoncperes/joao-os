@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Pedro OS',
-    short_name: 'Pedro OS',
-    description: "Pedro's personal operating system.",
+    name: 'João OS',
+    short_name: 'João OS',
+    description: "João's personal operating system.",
     start_url: '/today',
     display: 'standalone',
     background_color: '#0a0a0b',

@@ -5,7 +5,7 @@ import { computeIdentityClaims } from '@/lib/identity/claims';
 import { addDays } from '@/lib/date';
 import type { Area } from '@/lib/supabase/types';
 
-export const metadata = { title: 'Identity — Pedro OS' };
+export const metadata = { title: 'Identity — João OS' };
 export const dynamic = 'force-dynamic';
 
 const AREA_ORDER: Area[] = [
@@ -275,8 +275,8 @@ export default async function IdentityPage() {
           <EmptyState text="No vision entries seeded yet." />
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {vision5y ? <VisionCard label="5 years (Pedro at 29)" entry={vision5y} /> : null}
-            {vision10y ? <VisionCard label="10 years (Pedro at 34)" entry={vision10y} /> : null}
+            {vision5y ? <VisionCard label="5 years (João at 29)" entry={vision5y} /> : null}
+            {vision10y ? <VisionCard label="10 years (João at 34)" entry={vision10y} /> : null}
           </div>
         )}
       </section>

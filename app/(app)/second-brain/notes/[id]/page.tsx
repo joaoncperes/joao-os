@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { Folder, Note, TipTapDoc } from '@/lib/supabase/types';
 import { NoteEditorClient } from './note-editor-client';
 
-export const metadata = { title: 'Nota — Second Brain — Pedro OS' };
+export const metadata = { title: 'Nota — Second Brain — João OS' };
 export const dynamic = 'force-dynamic';
 
 export default async function NotePage({
