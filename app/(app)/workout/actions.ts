@@ -83,6 +83,7 @@ export async function updateSessionDate(input: { sessionId: string; newDate: str
       return { ok: false, error: error.message };
     }
     revalidatePath('/workout');
+    revalidatePath('/metas');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -99,6 +100,7 @@ export async function deleteSession(sessionId: string): Promise<Result> {
       .eq('user_id', userId);
     if (error) return { ok: false, error: error.message };
     revalidatePath('/workout');
+    revalidatePath('/metas');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -114,10 +116,12 @@ export async function deleteSession(sessionId: string): Promise<Result> {
 export async function createCardioSession(input: {
   date: string;
   kcal?: number | null;
+  distanceKm?: number | null;
+  durationMinutes?: number | null;
 }): Promise<Result<{ id: string }>> {
   try {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
-      return { ok: false, error: 'Invalid date.' };
+      return { ok: false, error: 'Data inválida.' };
     }
     const { supabase, userId } = await ctx();
     const { data, error } = await supabase
@@ -126,13 +130,16 @@ export async function createCardioSession(input: {
         user_id: userId,
         session_id: null,
         session_date: input.date,
+        type: 'running',
         kcal: input.kcal ?? null,
+        distance_km: input.distanceKm ?? null,
+        duration_minutes: input.durationMinutes ?? null,
       })
       .select('id')
       .single();
     if (error || !data) return { ok: false, error: error?.message ?? 'create failed' };
     revalidatePath('/workout');
-    revalidatePath('/insights');
+    revalidatePath('/metas');
     return { ok: true, data: { id: data.id } };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -143,17 +150,26 @@ export async function updateCardioSession(input: {
   id: string;
   date?: string;
   kcal?: number | null;
+  distanceKm?: number | null;
+  durationMinutes?: number | null;
 }): Promise<Result> {
   try {
     const { supabase, userId } = await ctx();
-    const patch: { session_date?: string; kcal?: number | null } = {};
+    const patch: {
+      session_date?: string;
+      kcal?: number | null;
+      distance_km?: number | null;
+      duration_minutes?: number | null;
+    } = {};
     if (input.date !== undefined) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
-        return { ok: false, error: 'Invalid date.' };
+        return { ok: false, error: 'Data inválida.' };
       }
       patch.session_date = input.date;
     }
     if (input.kcal !== undefined) patch.kcal = input.kcal;
+    if (input.distanceKm !== undefined) patch.distance_km = input.distanceKm;
+    if (input.durationMinutes !== undefined) patch.duration_minutes = input.durationMinutes;
     if (Object.keys(patch).length === 0) return { ok: true };
 
     const { error } = await supabase
@@ -163,7 +179,7 @@ export async function updateCardioSession(input: {
       .eq('user_id', userId);
     if (error) return { ok: false, error: error.message };
     revalidatePath('/workout');
-    revalidatePath('/insights');
+    revalidatePath('/metas');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -180,7 +196,7 @@ export async function deleteCardioSession(id: string): Promise<Result> {
       .eq('user_id', userId);
     if (error) return { ok: false, error: error.message };
     revalidatePath('/workout');
-    revalidatePath('/insights');
+    revalidatePath('/metas');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -238,6 +254,7 @@ export async function upsertSet(input: {
     }
 
     revalidatePath('/workout');
+    revalidatePath('/metas');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };

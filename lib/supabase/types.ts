@@ -140,6 +140,8 @@ export interface CardioListRow {
   id: string;
   session_date: string; // 'YYYY-MM-DD'
   kcal: number | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
 }
 
 // One Sunday-anchored week of cardio, aggregated in JS in insights/page.tsx

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { dowInTz, addDays, todayInTz, sundayWeekStart } from '@/lib/date';
+import { dowInTz, addDays, todayInTz } from '@/lib/date';
+import { mondayOf } from '@/lib/goals';
 import type { CardioListRow } from '@/lib/supabase/types';
 import {
   WorkoutClient,
@@ -8,10 +9,10 @@ import {
   type DayTab,
 } from './workout-client';
 
-export const metadata = { title: 'Workout — João OS' };
+export const metadata = { title: 'Treino — João OS' };
 
-const SHORT_DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const FULL_DAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const SHORT_DAY = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const FULL_DAY = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default async function WorkoutPage({
   searchParams,
@@ -39,10 +40,11 @@ export default async function WorkoutPage({
       ? Number(dayParam)
       : todayDow;
 
-  // Day tabs: Sunday-anchored week dates (0..6, Sun..Sat).
-  const weekStart = addDays(today, -todayDow);
-  const dayTabs: DayTab[] = Array.from({ length: 7 }, (_, dow) => {
-    const date = addDays(weekStart, dow);
+  // Abas dos dias: semana de segunda a domingo.
+  const weekStart = mondayOf(today);
+  const dayTabs: DayTab[] = Array.from({ length: 7 }, (_, i) => {
+    const dow = (i + 1) % 7;
+    const date = addDays(weekStart, i);
     return {
       value: String(dow),
       shortName: SHORT_DAY[dow],
@@ -144,29 +146,29 @@ export default async function WorkoutPage({
   // Cardio sessions for the Cardio tab — all dates, newest first (independent of
   // day-of-week). Multiple per date are allowed now → created_at tiebreak.
   let cardioRows: CardioListRow[] = [];
-  let cardioStats: { thisWeekKcal: number; lastKcal: number | null; sessionCount: number } = {
-    thisWeekKcal: 0,
-    lastKcal: null,
+  let cardioStats: { weekKm: number; weekRuns: number; sessionCount: number } = {
+    weekKm: 0,
+    weekRuns: 0,
     sessionCount: 0,
   };
   if (isCardioTab) {
     const { data } = await supabase
       .from('cardio_sessions')
-      .select('id, session_date, kcal')
+      .select('id, session_date, kcal, distance_km, duration_minutes')
       .eq('user_id', user.id)
       .order('session_date', { ascending: false })
       .order('created_at', { ascending: false })
       .returns<CardioListRow[]>();
-    cardioRows = data ?? [];
-    const wk = sundayWeekStart(today);
+    cardioRows = (data ?? []).map((r) => ({
+      ...r,
+      distance_km: r.distance_km == null ? null : Number(r.distance_km),
+    }));
+    const wk = mondayOf(today);
+    const thisWeek = cardioRows.filter((r) => r.session_date >= wk);
     cardioStats = {
       sessionCount: cardioRows.length,
-      lastKcal: cardioRows.find((r) => r.kcal != null)?.kcal ?? null,
-      thisWeekKcal: cardioRows.reduce(
-        (s, r) =>
-          s + (r.kcal != null && sundayWeekStart(r.session_date) === wk ? r.kcal : 0),
-        0,
-      ),
+      weekRuns: thisWeek.length,
+      weekKm: Math.round(thisWeek.reduce((s, r) => s + (r.distance_km ?? 0), 0) * 10) / 10,
     };
   }
 
@@ -261,7 +263,7 @@ export default async function WorkoutPage({
       cardioTab={isCardioTab}
       cardioRows={cardioRows}
       cardioStats={cardioStats}
-      splitName={split?.split_name ?? 'No split configured'}
+      splitName={split?.split_name ?? 'Sem treino definido'}
       isRest={!!split?.is_rest}
       muscles={muscles}
       fullDayName={FULL_DAY[day]}

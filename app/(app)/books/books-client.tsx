@@ -37,8 +37,8 @@ function isPriority(value: string | null): value is BookPriority {
 const GRADE_THRESHOLDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 const SORT_MODES = [
-  { mode: 'priority', label: 'Priority' },
-  { mode: 'grade', label: 'Rating' },
+  { mode: 'priority', label: 'Prioridade' },
+  { mode: 'grade', label: 'Nota' },
 ] as const;
 
 export function BooksClient({
@@ -159,18 +159,18 @@ export function BooksClient({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="text-text-3 mb-1.5 text-[13px] font-medium uppercase tracking-[0.02em]">
-            Books
+            Biblioteca
           </div>
           <h1 className="text-text text-[30px] font-semibold leading-[1.1] tracking-[-0.02em]">
-            Books
+            Livros
           </h1>
           <p className="text-text-3 mt-2 text-[13px]">
-            {total} books in your library · {reading} reading
+            {total} {total === 1 ? 'livro' : 'livros'} na biblioteca · {reading} lendo agora
             {pendingNotes > 0 ? (
               <>
                 {' · '}
                 <span className="text-amber-700 font-semibold">
-                  {pendingNotes} pending notes
+                  {pendingNotes} sem notas
                 </span>
               </>
             ) : null}
@@ -183,7 +183,7 @@ export function BooksClient({
           }}
         >
           <Plus className="mr-1.5 h-4 w-4" />
-          New
+          Novo livro
         </Button>
       </header>
 
@@ -194,7 +194,7 @@ export function BooksClient({
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-text-3 mr-1 text-[10.5px] font-semibold uppercase tracking-[0.06em]">
-            Priority
+            Prioridade
           </span>
           <button
             type="button"
@@ -206,7 +206,7 @@ export function BooksClient({
                 : 'bg-surface-2 text-text-2 ring-border hover:text-text',
             )}
           >
-            All
+            Todos
           </button>
           {PRIORITY_ORDER.map((p) => (
             <button
@@ -223,7 +223,7 @@ export function BooksClient({
                   priorityFilter && priorityFilter !== p && 'opacity-40',
                 )}
               />
-              <span className="sr-only">Filter by {PRIORITY_LABEL[p]}</span>
+              <span className="sr-only">Filtrar por {PRIORITY_LABEL[p]}</span>
             </button>
           ))}
         </div>
@@ -231,7 +231,7 @@ export function BooksClient({
         {presentCategories.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-text-3 mr-1 text-[10.5px] font-semibold uppercase tracking-[0.06em]">
-              Category
+              Categoria
             </span>
             <button
               type="button"
@@ -243,7 +243,7 @@ export function BooksClient({
                   : 'bg-surface-2 text-text-2 ring-border hover:text-text',
               )}
             >
-              All
+              Todos
             </button>
             {presentCategories.map((c) => (
               <CategoryChip
@@ -261,7 +261,7 @@ export function BooksClient({
 
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-text-3 mr-1 text-[10.5px] font-semibold uppercase tracking-[0.06em]">
-            Min rating
+            Nota mínima
           </span>
           <button
             type="button"
@@ -273,7 +273,7 @@ export function BooksClient({
                 : 'bg-surface-2 text-text-2 ring-border hover:text-text',
             )}
           >
-            All
+            Todos
           </button>
           {GRADE_THRESHOLDS.map((n) => (
             <button
@@ -295,7 +295,7 @@ export function BooksClient({
         <div className="relative">
           <Search className="text-text-3 absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
           <Input
-            placeholder="Filter by title, author, or 'por que'…"
+            placeholder="Filtrar por título, autor ou 'por que'…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -305,7 +305,7 @@ export function BooksClient({
               type="button"
               onClick={() => setSearchQuery('')}
               className="text-text-3 hover:text-text absolute right-3 top-1/2 -translate-y-1/2"
-              aria-label="Clear filter"
+              aria-label="Limpar filtro"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -314,7 +314,7 @@ export function BooksClient({
 
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-text-3 mr-1 text-[10.5px] font-semibold uppercase tracking-[0.06em]">
-            Sort
+            Ordenar
           </span>
           {SORT_MODES.map(({ mode, label }) => (
             <button
@@ -340,7 +340,7 @@ export function BooksClient({
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-surface border-border text-text-3 rounded-xl border px-5 py-10 text-center text-[13px]">
-          {filtersOn ? 'No books match your filters.' : 'No books yet — tap New to add one.'}
+          {filtersOn ? 'Nenhum livro com esses filtros.' : 'Nenhum livro ainda — toque em Novo livro para adicionar.'}
         </div>
       ) : sortMode === 'grade' ? (
         <ul className="flex flex-col gap-2">

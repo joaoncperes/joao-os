@@ -14,5 +14,5 @@ export default async function Home() {
     .eq('id', user.id)
     .maybeSingle();
 
-  redirect(profile?.setup_completed_at ? '/today' : '/setup/welcome');
+  redirect(profile?.setup_completed_at ? '/metas' : '/setup/welcome');
 }

@@ -13,12 +13,12 @@ export const PRIORITY_ORDER: BookPriority[] = [
 // — they're the check-constrained column values mirrored from Notion, and the
 // import mapping in lib/notion-to-tiptap.ts still keys off them.
 export const PRIORITY_LABEL: Record<BookPriority, string> = {
-  lendo: 'Reading',
-  urgente: 'Urgent',
-  alta: 'High',
-  media: 'Medium',
-  baixa: 'Low',
-  lido: 'Read',
+  lendo: 'Lendo',
+  urgente: 'Urgente',
+  alta: 'Alta',
+  media: 'Média',
+  baixa: 'Baixa',
+  lido: 'Lido',
 };
 
 // Tailwind utility strings chosen to mirror the Notion chip colors Pedro is

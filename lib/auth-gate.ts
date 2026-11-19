@@ -47,7 +47,7 @@ export async function requireAuth(
     redirect('/setup/welcome');
   }
   if (requireSetup === 'incomplete' && setupComplete) {
-    redirect('/today');
+    redirect('/metas');
   }
 
   return account;

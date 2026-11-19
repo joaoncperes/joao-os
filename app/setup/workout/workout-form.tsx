@@ -31,7 +31,7 @@ export function WorkoutForm({ initialSplit, dayLabels }: Props) {
             toast.error(result.error);
             return;
           }
-          router.push('/today');
+          router.push('/metas');
         });
       }}
       className="space-y-3"

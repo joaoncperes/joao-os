@@ -50,7 +50,7 @@ interface Props {
   dayTabs: DayTab[];
   cardioTab: boolean;
   cardioRows: CardioListRow[];
-  cardioStats: { thisWeekKcal: number; lastKcal: number | null; sessionCount: number };
+  cardioStats: { weekKm: number; weekRuns: number; sessionCount: number };
   splitName: string;
   isRest: boolean;
   muscles: string[];
@@ -87,13 +87,13 @@ export function WorkoutClient(props: Props) {
   const tabItems: TabBarItem[] = props.dayTabs.map((t) => ({
     value: t.value,
     label: String(t.dateNumber).padStart(2, '0'),
-    sub: t.isToday ? `${t.shortName} · today` : t.shortName,
+    sub: t.isToday ? `${t.shortName} · hoje` : t.shortName,
     highlighted: t.isToday,
   }));
   tabItems.push({
     value: 'cardio',
     label: <HeartPulse className="h-[15px] w-[15px]" aria-hidden />,
-    sub: 'Cardio',
+    sub: 'Corrida',
   });
 
   // Cardio is decoupled from the weekday split — its own tab, logged on any day.
@@ -101,9 +101,9 @@ export function WorkoutClient(props: Props) {
     return (
       <div className="flex flex-col">
         <SectionHeader
-          eyebrow="Workout · Cardio"
-          title="Cardio"
-          subtitle="Log cardio on any day — calories are tracked weekly in Insights."
+          eyebrow="Treino · Corrida"
+          title="Corrida"
+          subtitle="Registre suas corridas em qualquer dia da semana."
         />
         <div className="mb-7">
           <TabBar
@@ -121,9 +121,9 @@ export function WorkoutClient(props: Props) {
     <div className="flex flex-col">
       <RestTimer lastCompletedAt={props.todayLastCompletedAt} />
       <SectionHeader
-        eyebrow="Workout · Load progression"
+        eyebrow="Treino · Progressão de carga"
         title={props.fullDayName}
-        subtitle="Track your weekly progression by training split."
+        subtitle="Registre séries, repetições e carga de cada treino."
       />
 
       <div className="mb-7">
@@ -140,7 +140,7 @@ export function WorkoutClient(props: Props) {
             {props.fullDayName}
           </div>
           <div className="text-text text-[19px] font-semibold tracking-[-0.01em]">
-            {props.isRest ? 'Rest' : props.splitName}
+            {props.isRest ? 'Descanso' : props.splitName}
           </div>
           {props.muscles.length > 0 ? (
             <div className="mt-1 flex flex-wrap gap-1.5">
@@ -157,18 +157,18 @@ export function WorkoutClient(props: Props) {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href="/setup/workout"
+            href="/workout/plano"
             className="bg-surface border-border text-text-2 hover:bg-surface-2 hover:border-border-strong hover:text-text inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-[13px] font-medium transition-colors"
           >
             <Settings className="h-3.5 w-3.5" />
-            Edit split
+            Editar plano
           </Link>
           <input
             type="date"
             value={newDate}
             max={props.today}
             onChange={(e) => setNewDate(e.target.value)}
-            aria-label="New session date"
+            aria-label="Data do novo treino"
             className="border-border bg-surface text-text focus:border-accent rounded-lg border px-2.5 py-2 text-[12.5px] tabular-nums outline-none focus:shadow-[0_0_0_3px_var(--accent-soft)]"
           />
           <button
@@ -181,7 +181,7 @@ export function WorkoutClient(props: Props) {
                   toast.error(r.error);
                   return;
                 }
-                toast.success(`New session: ${formatBR(r.data.sessionDate)}`);
+                toast.success(`Novo treino: ${formatBR(r.data.sessionDate)}`);
                 // Jump to the weekday of the created session so the new row is visible.
                 const dow = new Date(`${r.data.sessionDate}T00:00:00Z`).getUTCDay();
                 router.push(`/workout?day=${dow}`);
@@ -191,7 +191,7 @@ export function WorkoutClient(props: Props) {
             className="bg-accent inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-[filter] hover:brightness-95 disabled:cursor-default disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
-            New session
+            Novo treino
           </button>
         </div>
       </div>
@@ -199,14 +199,14 @@ export function WorkoutClient(props: Props) {
       {props.isRest ? (
         <RestEmptyCard
           icon={<Moon className="h-6 w-6" />}
-          title="Rest day"
-          subtitle={`No split planned for ${props.fullDayName.toLowerCase()}. Enjoy the recovery.`}
+          title="Dia de descanso"
+          subtitle={`Nenhum treino planejado para ${props.fullDayName.toLowerCase()}. Aproveite para recuperar.`}
         />
       ) : props.exercises.length === 0 ? (
         <RestEmptyCard
           icon={<Settings className="h-6 w-6" />}
-          title="Split has no exercises"
-          subtitle="Configure exercises in Settings to start logging sessions."
+          title="Esse dia ainda não tem exercícios"
+          subtitle="Toque em Editar plano para montar o treino deste dia."
         />
       ) : (
         <>
@@ -256,36 +256,36 @@ function StatsRow({
   return (
     <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
-        label="Last session"
+        label="Último treino"
         value={stats.lastSessionDate ? formatBR(stats.lastSessionDate).slice(0, 5) : '—'}
         trend={{
           dir: 'flat',
-          text: `${stats.sessionCount} ${stats.sessionCount === 1 ? 'session logged' : 'sessions logged'}`,
+          text: `${stats.sessionCount} ${stats.sessionCount === 1 ? 'treino registrado' : 'treinos registrados'}`,
         }}
       />
       <StatCard
-        label="Total volume"
-        value={Math.round(stats.lastVolume).toLocaleString('en-US')}
+        label="Volume total"
+        value={Math.round(stats.lastVolume).toLocaleString('pt-BR')}
         unit="kg"
         trend={{
           dir: trendDir,
-          text: `${trendArrow} ${Math.abs(stats.volumeDeltaPct)}% vs previous`,
+          text: `${trendArrow} ${Math.abs(stats.volumeDeltaPct)}% vs anterior`,
         }}
       />
       <StatCard
-        label="Personal records"
+        label="Recordes (PR)"
         value={stats.prCountThisSession}
-        unit="this session"
+        unit="no último treino"
         trend={{
           dir: stats.prCountThisSession > 0 ? 'up' : 'flat',
-          text: stats.prCountThisSession > 0 ? 'Keep the pace' : 'Next PR ahead',
+          text: stats.prCountThisSession > 0 ? 'Mantenha o ritmo' : 'Próximo PR vem aí',
         }}
       />
       <StatCard
-        label="Planned volume"
+        label="Volume planejado"
         value={exerciseCount}
-        unit={`exercises · ${stats.totalSets} sets`}
-        trend={{ dir: 'flat', text: 'Per session' }}
+        unit={`exercícios · ${stats.totalSets} séries`}
+        trend={{ dir: 'flat', text: 'Por treino' }}
       />
     </div>
   );
@@ -305,11 +305,11 @@ function SessionsCard({
   return (
     <div className="bg-surface border-border overflow-hidden rounded-xl border">
       <div className="border-border flex items-center justify-between gap-4 border-b px-5 py-4">
-        <h3 className="text-text m-0 text-[14px] font-semibold">Session history</h3>
+        <h3 className="text-text m-0 text-[14px] font-semibold">Histórico de treinos</h3>
         <div className="text-text-3 text-xs font-medium">
           {sessions.length}{' '}
-          {sessions.length === 1 ? 'session' : 'sessions'} · {exercises.length} exercises ·{' '}
-          {totalSets} sets per session
+          {sessions.length === 1 ? 'treino' : 'treinos'} · {exercises.length} exercícios ·{' '}
+          {totalSets} séries por treino
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -321,7 +321,7 @@ function SessionsCard({
                 className="bg-surface-2 text-text border-border sticky left-0 z-30 border-b px-3 py-2.5 text-left text-[12px] font-semibold"
                 style={{ minWidth: 180, boxShadow: '1px 0 0 var(--border)' }}
               >
-                Date
+                Data
               </th>
               {exercises.map((ex, i) => (
                 <th
@@ -342,7 +342,7 @@ function SessionsCard({
                     </div>
                   ) : null}
                   <div className="text-text-4 mt-0.5 text-[10.5px] font-semibold uppercase tracking-[0.06em]">
-                    {ex.sets} sets · kg × reps
+                    {ex.sets} séries · kg × reps
                   </div>
                 </th>
               ))}
@@ -372,10 +372,10 @@ function SessionsCard({
                       <CircleHelp className="h-4 w-4" />
                     </div>
                     <div className="text-text text-sm font-semibold">
-                      No sessions logged
+                      Nenhum treino registrado
                     </div>
                     <div className="text-text-3 text-[13px]">
-                      Tap <span className="text-text font-medium">+ New session</span> to get started.
+                      Toque em <span className="text-text font-medium">+ Novo treino</span> para começar.
                     </div>
                   </div>
                 </td>
@@ -412,7 +412,7 @@ function SessionTableRow({
           <input
             type="date"
             defaultValue={session.date}
-            aria-label="Session date"
+            aria-label="Data do treino"
             className="border-border bg-surface text-text focus:border-accent w-[124px] rounded-md border px-2 py-1.5 text-[12.5px] tabular-nums outline-none focus:shadow-[0_0_0_3px_var(--accent-soft)]"
             onBlur={(e) => {
               const v = e.target.value;
@@ -558,6 +558,21 @@ function SetCell({
   );
 }
 
+type CardioStats = { weekKm: number; weekRuns: number; sessionCount: number };
+
+function formatPace(km: number | null, minutes: number | null): string | null {
+  if (!km || !minutes || km <= 0 || minutes <= 0) return null;
+  const pace = minutes / km;
+  const mm = Math.floor(pace);
+  const ss = Math.round((pace - mm) * 60);
+  const fixed = ss === 60 ? { mm: mm + 1, ss: 0 } : { mm, ss };
+  return `${fixed.mm}:${String(fixed.ss).padStart(2, '0')}/km`;
+}
+
+function formatKm(km: number): string {
+  return Number.isInteger(km) ? String(km) : km.toFixed(1).replace('.', ',');
+}
+
 function CardioTab({
   today,
   rows,
@@ -565,108 +580,134 @@ function CardioTab({
 }: {
   today: string;
   rows: CardioListRow[];
-  stats: { thisWeekKcal: number; lastKcal: number | null; sessionCount: number };
+  stats: CardioStats;
 }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   const [newDate, setNewDate] = useState(today);
-  const [newKcal, setNewKcal] = useState('');
+  const [newKm, setNewKm] = useState('');
+  const [newMin, setNewMin] = useState('');
 
-  function addCardio() {
+  function addRun() {
     if (!newDate || pending) return;
-    const kcal = newKcal === '' ? null : Math.round(Number(newKcal));
+    const km = parseDecimalInput(newKm);
+    const minutes = newMin === '' ? null : Math.round(Number(newMin));
     start(async () => {
-      const r = await createCardioSession({ date: newDate, kcal });
+      const r = await createCardioSession({
+        date: newDate,
+        distanceKm: km,
+        durationMinutes: minutes != null && Number.isFinite(minutes) ? minutes : null,
+      });
       if (!r.ok) {
         toast.error(r.error);
         return;
       }
-      toast.success(`Cardio logged: ${formatBR(newDate)}`);
-      setNewKcal('');
+      toast.success(`Corrida registrada: ${formatBR(newDate)}`);
+      setNewKm('');
+      setNewMin('');
       router.refresh();
     });
   }
+
+  const inputBox =
+    'border-border bg-surface focus-within:border-accent inline-flex items-center gap-1 rounded-lg border p-0.5 focus-within:shadow-[0_0_0_3px_var(--accent-soft)]';
+  const numInput =
+    'text-text placeholder:text-text-4 w-16 border-none bg-transparent px-2 py-1.5 text-center text-[13px] font-semibold tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
+  const unitLabel = 'text-text-4 pr-2 text-[11px] font-medium uppercase tracking-[0.04em]';
 
   return (
     <div className="flex flex-col">
       <div className="bg-surface border-border mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border px-5 py-5">
         <div className="flex min-w-[200px] flex-col gap-1">
           <div className="text-text-3 text-[11px] font-semibold uppercase tracking-[0.08em]">
-            Cardio
+            Corrida
           </div>
           <div className="text-text text-[19px] font-semibold tracking-[-0.01em]">
-            Log on any day
+            Registrar corrida
           </div>
           <div className="text-text-3 mt-0.5 text-[12.5px]">
-            Calories roll up weekly in Insights.
+            Conta para a sua meta semanal de corridas.
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"
             value={newDate}
             max={today}
             onChange={(e) => setNewDate(e.target.value)}
-            aria-label="Cardio date"
+            aria-label="Data da corrida"
             className="border-border bg-surface text-text focus:border-accent rounded-lg border px-2.5 py-2 text-[12.5px] tabular-nums outline-none focus:shadow-[0_0_0_3px_var(--accent-soft)]"
           />
-          <div className="border-border bg-surface focus-within:border-accent inline-flex items-center gap-1.5 rounded-lg border p-0.5 focus-within:shadow-[0_0_0_3px_var(--accent-soft)]">
+          <div className={inputBox}>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={newKm}
+              onChange={(e) => setNewKm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addRun();
+              }}
+              aria-label="Distância em km"
+              placeholder="0,0"
+              className={numInput}
+            />
+            <span className={unitLabel}>km</span>
+          </div>
+          <div className={inputBox}>
             <input
               type="number"
               inputMode="numeric"
               step="1"
               min="0"
-              value={newKcal}
-              onChange={(e) => setNewKcal(e.target.value)}
+              value={newMin}
+              onChange={(e) => setNewMin(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') addCardio();
+                if (e.key === 'Enter') addRun();
               }}
-              aria-label="Cardio kcal"
-              placeholder="kcal"
-              className="text-text placeholder:text-text-4 w-20 border-none bg-transparent px-2 py-1.5 text-center text-[13px] font-semibold tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              aria-label="Duração em minutos"
+              placeholder="0"
+              className={numInput}
             />
-            <span className="text-text-4 pr-2 text-[11px] font-medium uppercase tracking-[0.04em]">
-              kcal
-            </span>
+            <span className={unitLabel}>min</span>
           </div>
           <button
             type="button"
             disabled={pending || !newDate}
-            onClick={addCardio}
+            onClick={addRun}
             className="bg-accent inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-[filter] hover:brightness-95 disabled:cursor-default disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
-            Add cardio
+            Registrar
           </button>
         </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatCard
-          label="This week"
-          value={stats.thisWeekKcal > 0 ? stats.thisWeekKcal.toLocaleString('en-US') : '—'}
-          unit="kcal"
-          trend={{ dir: 'flat', text: 'Sun → Sat' }}
+          label="Nesta semana"
+          value={stats.weekRuns}
+          unit={stats.weekRuns === 1 ? 'corrida' : 'corridas'}
+          trend={{ dir: 'flat', text: 'Seg → Dom' }}
         />
         <StatCard
-          label="Last session"
-          value={stats.lastKcal != null ? stats.lastKcal.toLocaleString('en-US') : '—'}
-          unit="kcal"
-          trend={{ dir: 'flat', text: stats.lastKcal != null ? 'Most recent' : 'Log to start' }}
+          label="Km na semana"
+          value={stats.weekKm > 0 ? formatKm(stats.weekKm) : '—'}
+          unit="km"
+          trend={{ dir: 'flat', text: 'Seg → Dom' }}
         />
         <StatCard
-          label="Total sessions"
+          label="Total"
           value={stats.sessionCount}
-          unit={stats.sessionCount === 1 ? 'session' : 'sessions'}
-          trend={{ dir: 'flat', text: 'All time' }}
+          unit={stats.sessionCount === 1 ? 'corrida' : 'corridas'}
+          trend={{ dir: 'flat', text: 'Desde o início' }}
         />
       </div>
 
       <div className="bg-surface border-border overflow-hidden rounded-xl border">
         <div className="border-border flex items-center justify-between gap-4 border-b px-5 py-4">
-          <h3 className="text-text m-0 text-[14px] font-semibold">Cardio history</h3>
+          <h3 className="text-text m-0 text-[14px] font-semibold">Histórico de corridas</h3>
           <div className="text-text-3 text-xs font-medium">
-            {rows.length} {rows.length === 1 ? 'session' : 'sessions'} · kcal per session
+            {rows.length} {rows.length === 1 ? 'corrida' : 'corridas'}
           </div>
         </div>
         {rows.length === 0 ? (
@@ -675,10 +716,10 @@ function CardioTab({
               <div className="bg-surface-2 text-text-3 grid h-10 w-10 place-items-center rounded-lg">
                 <CircleHelp className="h-4 w-4" />
               </div>
-              <div className="text-text text-sm font-semibold">No cardio logged</div>
+              <div className="text-text text-sm font-semibold">Nenhuma corrida ainda</div>
               <div className="text-text-3 text-[13px]">
-                Pick a date, enter kcal, and tap{' '}
-                <span className="text-text font-medium">+ Add cardio</span>.
+                Escolha a data, coloque km e minutos e toque em{' '}
+                <span className="text-text font-medium">+ Registrar</span>.
               </div>
             </div>
           </div>
@@ -697,13 +738,14 @@ function CardioTab({
 function CardioSessionRow({ row }: { row: CardioListRow }) {
   const [, start] = useTransition();
   const router = useRouter();
+  const pace = formatPace(row.distance_km, row.duration_minutes);
 
   return (
-    <li className="flex items-center gap-3 px-5 py-3">
+    <li className="flex flex-wrap items-center gap-3 px-5 py-3">
       <input
         type="date"
         defaultValue={row.session_date}
-        aria-label="Cardio date"
+        aria-label="Data da corrida"
         className="border-border bg-surface text-text focus:border-accent w-[140px] rounded-md border px-2 py-1.5 text-[12.5px] tabular-nums outline-none focus:shadow-[0_0_0_3px_var(--accent-soft)]"
         onBlur={(e) => {
           const v = e.target.value;
@@ -723,12 +765,25 @@ function CardioSessionRow({ row }: { row: CardioListRow }) {
           });
         }}
       />
-      <CardioKcalCell cardioId={row.id} initial={row.kcal} />
+      <CardioNumberCell
+        label="km"
+        decimal
+        initial={row.distance_km}
+        onSave={(v) => updateCardioSession({ id: row.id, distanceKm: v })}
+      />
+      <CardioNumberCell
+        label="min"
+        initial={row.duration_minutes}
+        onSave={(v) =>
+          updateCardioSession({ id: row.id, durationMinutes: v == null ? null : Math.round(v) })
+        }
+      />
+      {pace ? <span className="text-text-3 text-[12px] font-medium tabular-nums">{pace}</span> : null}
       <button
         type="button"
-        aria-label="Delete cardio session"
+        aria-label="Apagar corrida"
         onClick={() => {
-          if (!confirm(`Delete cardio from ${formatBR(row.session_date)}?`)) return;
+          if (!confirm(`Apagar a corrida de ${formatBR(row.session_date)}?`)) return;
           start(async () => {
             const r = await deleteCardioSession(row.id);
             if (!r.ok) toast.error(r.error);
@@ -743,12 +798,16 @@ function CardioSessionRow({ row }: { row: CardioListRow }) {
   );
 }
 
-function CardioKcalCell({
-  cardioId,
+function CardioNumberCell({
+  label,
   initial,
+  decimal,
+  onSave,
 }: {
-  cardioId: string;
+  label: string;
   initial: number | null;
+  decimal?: boolean;
+  onSave: (value: number | null) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
   const [, start] = useTransition();
   const router = useRouter();
@@ -756,33 +815,30 @@ function CardioKcalCell({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border p-0.5 transition-[background-color,border-color]',
+        'inline-flex items-center gap-1 rounded-md border p-0.5 transition-[background-color,border-color]',
         hasValue ? 'bg-surface border-border' : 'bg-surface-2 border-transparent',
         'focus-within:bg-surface focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-soft)]',
       )}
     >
       <input
-        type="number"
-        inputMode="numeric"
-        step="1"
-        min="0"
-        defaultValue={initial ?? ''}
-        aria-label="kcal"
-        placeholder="kcal"
-        className="text-text placeholder:text-text-4 w-20 border-none bg-transparent px-2 py-1 text-center text-[13px] font-semibold tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        type="text"
+        inputMode={decimal ? 'decimal' : 'numeric'}
+        defaultValue={initial == null ? '' : decimal ? formatKm(initial) : String(initial)}
+        aria-label={label}
+        placeholder={label}
+        className="text-text placeholder:text-text-4 w-16 border-none bg-transparent px-2 py-1 text-center text-[13px] font-semibold tabular-nums outline-none"
         onBlur={(e) => {
-          const raw = e.target.value;
-          const v = raw === '' ? null : Math.round(Number(raw));
+          const v = parseDecimalInput(e.target.value);
           if (v === initial) return;
           start(async () => {
-            const res = await updateCardioSession({ id: cardioId, kcal: v });
+            const res = await onSave(v);
             if (!res.ok) toast.error(res.error);
             else router.refresh();
           });
         }}
       />
       <span className="text-text-4 pr-2 text-[11px] font-medium uppercase tracking-[0.04em]">
-        kcal
+        {label}
       </span>
     </div>
   );

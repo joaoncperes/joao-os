@@ -4,8 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'João OS',
     short_name: 'João OS',
-    description: "João's personal operating system.",
-    start_url: '/today',
+    description: 'Treino, leitura e metas do João.',
+    start_url: '/metas',
     display: 'standalone',
     background_color: '#0a0a0b',
     theme_color: '#0a0a0b',

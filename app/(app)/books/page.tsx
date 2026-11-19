@@ -2,11 +2,12 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getBookCategoryData } from '@/lib/book-categories';
 import type { Book } from '@/lib/supabase/types';
-import { Breadcrumb } from '@/components/breadcrumb';
+import { ReadingLogCard, type ReadingSessionRow } from '@/components/reading-log-card';
+import { mondayOf } from '@/lib/goals';
 import { BooksClient } from './books-client';
 import { todayInTz } from '@/lib/date';
 
-export const metadata = { title: 'Books — João OS' };
+export const metadata = { title: 'Livros — João OS' };
 export const dynamic = 'force-dynamic';
 
 // Grade comes from the URL (?grade=8). Accept only an integer in 0–10; anything
@@ -53,6 +54,46 @@ export default async function BooksPage({
     supabase.from('users').select('time_zone').eq('id', user.id).maybeSingle(),
   ]);
 
+  const today = todayInTz(profile?.time_zone ?? undefined);
+  const weekStart = mondayOf(today);
+  const [{ data: readingRows }, { data: readingGoal }] = await Promise.all([
+    supabase
+      .from('reading_sessions')
+      .select('id, session_date, minutes, created_at, book:books(title)')
+      .eq('user_id', user.id)
+      .order('session_date', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(30),
+    supabase
+      .from('goals')
+      .select('target_value')
+      .eq('user_id', user.id)
+      .eq('kind', 'weekly')
+      .eq('metric', 'reading_minutes')
+      .is('archived_at', null)
+      .order('position', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  type ReadingRaw = {
+    id: string;
+    session_date: string;
+    minutes: number;
+    book: { title: string } | { title: string }[] | null;
+  };
+  const readingAll: ReadingSessionRow[] = ((readingRows ?? []) as ReadingRaw[]).map((r) => {
+    const book = Array.isArray(r.book) ? r.book[0] : r.book;
+    return {
+      id: r.id,
+      session_date: r.session_date,
+      minutes: Number(r.minutes),
+      book_title: book?.title ?? null,
+    };
+  });
+  const weekMinutes = readingAll
+    .filter((r) => r.session_date >= weekStart)
+    .reduce((s, r) => s + r.minutes, 0);
+
   const noted = new Set(
     ((notedRows ?? []) as Array<{ book_id: string }>).map((n) => n.book_id),
   );
@@ -61,14 +102,22 @@ export default async function BooksPage({
     has_notes: noted.has((b as Book).id),
   }));
 
+  const readingBooks = books
+    .filter((b) => b.priority === 'lendo')
+    .map((b) => ({ id: b.id, title: b.title }));
+
   return (
-    <>
-      <Breadcrumb
-        items={[
-          { label: 'Second Brain', href: '/second-brain' },
-          { label: 'Resources', href: '/second-brain/resources' },
-          { label: 'Books' },
-        ]}
+    <div className="flex flex-col gap-7">
+      <ReadingLogCard
+        today={today}
+        books={readingBooks}
+        recent={readingAll.slice(0, 7)}
+        weekMinutes={weekMinutes}
+        weekTarget={
+          (readingGoal as { target_value: number } | null)?.target_value != null
+            ? Number((readingGoal as { target_value: number }).target_value)
+            : null
+        }
       />
       <BooksClient
         initialBooks={books}
@@ -79,8 +128,8 @@ export default async function BooksPage({
         initialMinGrade={parseGradeParam(params.grade)}
         initialSort={params.sort === 'grade' ? 'grade' : 'priority'}
         categoryData={categoryData}
-        today={todayInTz(profile?.time_zone ?? undefined)}
+        today={today}
       />
-    </>
+    </div>
   );
 }
