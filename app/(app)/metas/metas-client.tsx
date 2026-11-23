@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { BookOpen, Dumbbell, Flame, Footprints, Pencil, Plus, Target, Trash2 } from 'lucide-react';
+import { BookOpen, Dumbbell, Flame, Footprints, Pencil, Plus, Sparkles, Target, Trash2, Undo2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,20 @@ import {
   formatDatePt,
   formatNumber,
   formatWeekRange,
+  goalUnit,
   type Goal,
   type GoalKind,
   type GoalMetric,
 } from '@/lib/goals';
-import { createGoal, deleteGoal, updateGoal, updateManualValue, type GoalInput } from './actions';
+import {
+  createGoal,
+  deleteGoal,
+  logGoalEntry,
+  undoLastGoalEntry,
+  updateGoal,
+  updateManualValue,
+  type GoalInput,
+} from './actions';
 
 export interface WeeklyCard {
   goal: Goal;
@@ -61,6 +70,7 @@ const METRIC_ICON: Partial<Record<GoalMetric, typeof Dumbbell>> = {
   reading_minutes: BookOpen,
   books_finished: BookOpen,
   exercise_max: Dumbbell,
+  manual: Sparkles,
 };
 
 const LOG_LINK: Partial<Record<GoalMetric, { href: string; label: string }>> = {
@@ -71,7 +81,7 @@ const LOG_LINK: Partial<Record<GoalMetric, { href: string; label: string }>> = {
 };
 
 function unitFor(goal: Goal, value: number): string {
-  const unit = METRIC_META[goal.metric].unit;
+  const unit = goalUnit(goal);
   if (value === 1 && unit.endsWith('s') && unit !== 'min') return unit.slice(0, -1);
   return unit;
 }
@@ -131,7 +141,13 @@ export function MetasClient({ today, weekStart, weekly, targets, exercises, load
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {weekly.map((w) => (
-              <WeeklyGoalCard key={w.goal.id} card={w} onEdit={() => openEdit(w.goal)} />
+              <WeeklyGoalCard
+                key={w.goal.id}
+                card={w}
+                today={today}
+                weekStart={weekStart}
+                onEdit={() => openEdit(w.goal)}
+              />
             ))}
           </div>
         )}
@@ -152,7 +168,7 @@ export function MetasClient({ today, weekStart, weekly, targets, exercises, load
         </div>
         {targets.length === 0 ? (
           <EmptyCard
-            text="Ex.: supino 100 kg até junho, ler 25 livros em 2027, correr 200 km no semestre."
+            text="Ex.: supino 100 kg até junho, ler 25 livros em 2027, correr 200 km no semestre, tocar 50 músicas no piano."
             onAdd={() => openNew('target')}
             cta="Criar objetivo"
           />
@@ -200,7 +216,17 @@ function ProgressBar({ ratio, done }: { ratio: number; done: boolean }) {
   );
 }
 
-function WeeklyGoalCard({ card, onEdit }: { card: WeeklyCard; onEdit: () => void }) {
+function WeeklyGoalCard({
+  card,
+  today,
+  weekStart,
+  onEdit,
+}: {
+  card: WeeklyCard;
+  today: string;
+  weekStart: string;
+  onEdit: () => void;
+}) {
   const { goal, value, ratio, streak, history } = card;
   const done = value >= goal.target_value;
   const Icon = METRIC_ICON[goal.metric] ?? Target;
@@ -279,7 +305,83 @@ function WeeklyGoalCard({ card, onEdit }: { card: WeeklyCard; onEdit: () => void
           </Link>
         ) : null}
       </div>
+      {goal.metric === 'manual' ? (
+        <ManualEntryLogger goal={goal} today={today} weekStart={weekStart} />
+      ) : null}
     </div>
+  );
+}
+
+function ManualEntryLogger({ goal, today, weekStart }: { goal: Goal; today: string; weekStart: string }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [value, setValue] = useState('');
+  const unit = goalUnit(goal);
+  const isCount = unit === 'vezes' || unit === 'vez';
+
+  function log(v: number) {
+    start(async () => {
+      const r = await logGoalEntry(goal.id, v, today);
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      toast.success(`${goal.title}: +${formatNumber(v)} ${unit}`);
+      setValue('');
+      router.refresh();
+    });
+  }
+
+  return (
+    <form
+      className="border-border flex flex-wrap items-center gap-1.5 border-t pt-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const v = parseDecimalInput(value);
+        if (v == null || v <= 0) {
+          toast.error('Digite quanto você fez.');
+          return;
+        }
+        log(v);
+      }}
+    >
+      {isCount ? (
+        <Button type="button" size="sm" onClick={() => log(1)} disabled={pending}>
+          <Plus className="mr-1 h-3.5 w-3.5" />
+          Fiz hoje
+        </Button>
+      ) : (
+        <>
+          <Input
+            inputMode="decimal"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={unit}
+            aria-label={`Quanto (${unit})`}
+            className="h-8 w-20"
+          />
+          <Button type="submit" size="sm" disabled={pending}>
+            <Plus className="mr-1 h-3.5 w-3.5" />
+            Registrar
+          </Button>
+        </>
+      )}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const r = await undoLastGoalEntry(goal.id, weekStart);
+            if (!r.ok) toast.error(r.error);
+            else router.refresh();
+          })
+        }
+        className="text-text-3 hover:text-text ml-auto inline-flex items-center gap-1 text-[12px] font-medium disabled:opacity-50"
+      >
+        <Undo2 className="h-3.5 w-3.5" />
+        Desfazer
+      </button>
+    </form>
   );
 }
 
@@ -294,7 +396,7 @@ function TargetGoalCard({
 }) {
   const { goal, current, ratio, exerciseName } = card;
   const done = current >= goal.target_value;
-  const unit = METRIC_META[goal.metric].unit;
+  const unit = goalUnit(goal);
   const days = goal.due_date ? daysUntil(today, goal.due_date) : null;
 
   return (
@@ -413,6 +515,7 @@ function GoalDialog({
   const [startValue, setStartValue] = useState(
     goal?.start_value != null ? String(goal.start_value) : '',
   );
+  const [customUnit, setCustomUnit] = useState(goal?.unit ?? '');
 
   const metricOptions = (Object.keys(METRIC_META) as GoalMetric[]).filter((m) =>
     kind === 'weekly' ? METRIC_META[m].weekly : METRIC_META[m].target,
@@ -436,7 +539,8 @@ function GoalDialog({
       targetValue,
       dueDate: kind === 'target' && dueDate ? dueDate : null,
       exerciseId: metric === 'exercise_max' ? exerciseId || null : null,
-      startValue: metric === 'manual' ? parseDecimalInput(startValue) ?? 0 : null,
+      startValue: metric === 'manual' && kind === 'target' ? parseDecimalInput(startValue) ?? 0 : null,
+      unit: metric === 'manual' ? customUnit.trim() || 'vezes' : null,
     };
     start(async () => {
       const r = goal ? await updateGoal(goal.id, input) : await createGoal(input);
@@ -465,7 +569,7 @@ function GoalDialog({
     });
   }
 
-  const unit = METRIC_META[metric].unit;
+  const unit = metric === 'manual' ? customUnit.trim() || 'vezes' : METRIC_META[metric].unit;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -555,7 +659,15 @@ function GoalDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={
-                kind === 'weekly' ? 'Ex.: Treinar' : metric === 'exercise_max' ? 'Ex.: Supino 100 kg' : 'Ex.: Ler 25 livros'
+                metric === 'manual'
+                  ? kind === 'weekly'
+                    ? 'Ex.: Tocar piano'
+                    : 'Ex.: Aprender 10 músicas no piano'
+                  : kind === 'weekly'
+                    ? 'Ex.: Treinar'
+                    : metric === 'exercise_max'
+                      ? 'Ex.: Supino 100 kg'
+                      : 'Ex.: Ler 25 livros'
               }
             />
           </div>
@@ -590,6 +702,23 @@ function GoalDialog({
           </div>
 
           {metric === 'manual' ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="goal-unit">Unidade</Label>
+              <Input
+                id="goal-unit"
+                value={customUnit}
+                onChange={(e) => setCustomUnit(e.target.value)}
+                placeholder="vezes, min, páginas, músicas…"
+              />
+              <p className="text-text-3 text-[11.5px]">
+                {kind === 'weekly'
+                  ? 'Com "vezes", o card ganha um botão "Fiz hoje". Com outra unidade, você digita quanto fez.'
+                  : 'Você atualiza o valor à mão direto no card.'}
+              </p>
+            </div>
+          ) : null}
+
+          {metric === 'manual' && kind === 'target' ? (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="goal-start">Valor de hoje</Label>
               <Input

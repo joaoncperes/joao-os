@@ -27,7 +27,7 @@ export default async function MetasPage() {
   const { data: goalRows, error: goalsError } = await supabase
     .from('goals')
     .select(
-      'id, title, kind, metric, target_value, start_value, current_value, exercise_id, start_date, due_date, position',
+      'id, title, kind, metric, target_value, start_value, current_value, exercise_id, start_date, due_date, position, unit',
     )
     .eq('user_id', userId)
     .is('archived_at', null)
@@ -50,7 +50,9 @@ export default async function MetasPage() {
     .filter((g) => g.metric === 'exercise_max' && g.exercise_id)
     .map((g) => g.exercise_id as string);
 
-  const [sessionsRes, runsRes, readingRes, booksRes, maxRes, exercisesRes] = await Promise.all([
+  const manualIds = goals.filter((g) => g.metric === 'manual' && g.kind === 'weekly').map((g) => g.id);
+
+  const [sessionsRes, runsRes, readingRes, booksRes, maxRes, exercisesRes, entriesRes] = await Promise.all([
     supabase
       .from('workout_sessions')
       .select('id, session_date')
@@ -86,7 +88,20 @@ export default async function MetasPage() {
       .eq('user_id', userId)
       .eq('archived', false)
       .order('name', { ascending: true }),
+    manualIds.length
+      ? supabase
+          .from('goal_entries')
+          .select('goal_id, entry_date, value')
+          .eq('user_id', userId)
+          .in('goal_id', manualIds)
+          .gte('entry_date', from)
+      : Promise.resolve({ data: [] as { goal_id: string; entry_date: string; value: number }[] }),
   ]);
+
+  const manualEntries: Record<string, { date: string; value: number }[]> = {};
+  for (const e of (entriesRes.data ?? []) as { goal_id: string; entry_date: string; value: number }[]) {
+    (manualEntries[e.goal_id] ??= []).push({ date: e.entry_date, value: Number(e.value) });
+  }
 
   // Uma sessão só conta como treino se tiver pelo menos uma série preenchida.
   const sessions = (sessionsRes.data ?? []) as { id: string; session_date: string }[];
@@ -127,6 +142,7 @@ export default async function MetasPage() {
       .map((b) => b.finished_at)
       .filter((d): d is string => !!d),
     exerciseMax,
+    manualEntries,
   };
 
   const exercises = (exercisesRes.data ?? []) as { id: string; name: string }[];

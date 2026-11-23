@@ -24,6 +24,8 @@ export interface Goal {
   start_date: string; // YYYY-MM-DD
   due_date: string | null;
   position: number;
+  /** Unidade livre das metas manuais (ex.: "vezes", "min", "páginas"). */
+  unit: string | null;
 }
 
 export interface ActivityData {
@@ -35,6 +37,8 @@ export interface ActivityData {
   booksFinishedDates: string[];
   /** exercise_id → maior carga (kg) já registrada. */
   exerciseMax: Record<string, number>;
+  /** goal_id → registros manuais (metas manuais semanais). */
+  manualEntries: Record<string, { date: string; value: number }[]>;
 }
 
 export const METRIC_META: Record<
@@ -47,7 +51,7 @@ export const METRIC_META: Record<
   reading_minutes: { label: 'Minutos de leitura', unit: 'min', weekly: true, target: true },
   books_finished: { label: 'Livros terminados', unit: 'livros', weekly: false, target: true },
   exercise_max: { label: 'Carga num exercício', unit: 'kg', weekly: false, target: true },
-  manual: { label: 'Outro (atualizo à mão)', unit: '', weekly: false, target: true },
+  manual: { label: 'Outra coisa (eu registro à mão)', unit: '', weekly: true, target: true },
 };
 
 /** Soma 'days' dias a uma data 'YYYY-MM-DD'. */
@@ -99,7 +103,20 @@ export function metricValueBetween(
 
 /** Progresso da semana que começa em 'weekStart' (segunda). */
 export function weeklyValue(goal: Goal, data: ActivityData, weekStart: string): number {
-  return metricValueBetween(goal.metric, data, weekStart, plusDays(weekStart, 6));
+  const end = plusDays(weekStart, 6);
+  if (goal.metric === 'manual') {
+    const total = (data.manualEntries[goal.id] ?? [])
+      .filter((e) => inRange(e.date, weekStart, end))
+      .reduce((s, e) => s + e.value, 0);
+    return round1(total);
+  }
+  return metricValueBetween(goal.metric, data, weekStart, end);
+}
+
+/** Unidade exibida para a meta (a livre, nas manuais). */
+export function goalUnit(goal: Pick<Goal, 'metric' | 'unit'>): string {
+  if (goal.metric === 'manual') return goal.unit?.trim() || 'vezes';
+  return METRIC_META[goal.metric].unit;
 }
 
 /** Valor atual de um objetivo de longo prazo. */
