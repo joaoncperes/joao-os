@@ -256,6 +256,7 @@ export default async function WorkoutPage({
 
   return (
     <WorkoutClient
+      key={day}
       day={day}
       todayDow={todayDow}
       today={today}

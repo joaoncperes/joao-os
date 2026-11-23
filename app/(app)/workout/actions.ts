@@ -14,27 +14,27 @@ async function ctx() {
 }
 
 /**
- * Create a session on an explicit date. Day-of-week is derived from the date,
- * and the split snapshot is taken from the user's split for that weekday.
- * Fails (with a friendly message) if a session already exists for that date.
+ * Cria um treino numa data. O treino pertence ao dia do plano escolhido na aba
+ * ('day'), mesmo que a data caia em outro dia da semana — assim um treino de
+ * sexta feito no domingo continua aparecendo na aba de sexta.
+ * Se já existir um treino vazio nessa data, ele é reaproveitado.
  */
-export async function createSessionOnDate({ date }: { date: string }): Promise<Result<{ sessionId: string; sessionDate: string }>> {
+export async function createSessionOnDate({
+  date,
+  day,
+}: {
+  date: string;
+  day?: number;
+}): Promise<Result<{ sessionId: string; sessionDate: string }>> {
   try {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return { ok: false, error: 'Invalid date.' };
+      return { ok: false, error: 'Data inválida.' };
     }
     const { supabase, userId } = await ctx();
-    const dow = new Date(`${date}T00:00:00Z`).getUTCDay();
-
-    const { data: existing } = await supabase
-      .from('workout_sessions')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('session_date', date)
-      .maybeSingle();
-    if (existing) {
-      return { ok: false, error: 'A session already exists on this date.' };
-    }
+    const dow =
+      day != null && Number.isInteger(day) && day >= 0 && day <= 6
+        ? day
+        : new Date(`${date}T00:00:00Z`).getUTCDay();
 
     const { data: split } = await supabase
       .from('workout_split')
@@ -42,6 +42,41 @@ export async function createSessionOnDate({ date }: { date: string }): Promise<R
       .eq('user_id', userId)
       .eq('day_of_week', dow)
       .maybeSingle();
+    const splitName = (split as { split_name: string } | null)?.split_name ?? 'Treino';
+
+    const { data: existing } = await supabase
+      .from('workout_sessions')
+      .select('id, day_of_week, split_name_snapshot')
+      .eq('user_id', userId)
+      .eq('session_date', date)
+      .maybeSingle();
+    if (existing) {
+      const ex = existing as { id: string; day_of_week: number; split_name_snapshot: string | null };
+      if (ex.day_of_week === dow) {
+        return { ok: true, data: { sessionId: ex.id, sessionDate: date } };
+      }
+      const { count } = await supabase
+        .from('exercise_sets')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('session_id', ex.id);
+      if ((count ?? 0) > 0) {
+        const [y, m, d] = date.split('-');
+        return {
+          ok: false,
+          error: `Já existe um treino (${ex.split_name_snapshot ?? 'outro dia'}) registrado em ${d}/${m}/${y}. Escolha outra data.`,
+        };
+      }
+      // Treino vazio criado por engano: passa para o dia escolhido.
+      const { error } = await supabase
+        .from('workout_sessions')
+        .update({ day_of_week: dow, split_name_snapshot: splitName })
+        .eq('id', ex.id)
+        .eq('user_id', userId);
+      if (error) return { ok: false, error: error.message };
+      revalidatePath('/workout');
+      return { ok: true, data: { sessionId: ex.id, sessionDate: date } };
+    }
 
     const { data: created, error } = await supabase
       .from('workout_sessions')
@@ -49,15 +84,16 @@ export async function createSessionOnDate({ date }: { date: string }): Promise<R
         user_id: userId,
         session_date: date,
         day_of_week: dow,
-        split_name_snapshot: split?.split_name ?? 'Workout',
+        split_name_snapshot: splitName,
       })
       .select('id')
       .single();
     if (error || !created) {
-      if (error?.code === '23505') return { ok: false, error: 'A session already exists on this date.' };
-      return { ok: false, error: error?.message ?? 'create failed' };
+      if (error?.code === '23505') return { ok: false, error: 'Já existe um treino nessa data.' };
+      return { ok: false, error: error?.message ?? 'Não consegui criar o treino.' };
     }
     revalidatePath('/workout');
+    revalidatePath('/metas');
     return { ok: true, data: { sessionId: created.id, sessionDate: date } };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -67,18 +103,18 @@ export async function createSessionOnDate({ date }: { date: string }): Promise<R
 export async function updateSessionDate(input: { sessionId: string; newDate: string }): Promise<Result> {
   try {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input.newDate)) {
-      return { ok: false, error: 'Invalid date.' };
+      return { ok: false, error: 'Data inválida.' };
     }
     const { supabase, userId } = await ctx();
-    const dow = new Date(`${input.newDate}T00:00:00Z`).getUTCDay();
+    // O treino continua no mesmo dia do plano; só a data muda.
     const { error } = await supabase
       .from('workout_sessions')
-      .update({ session_date: input.newDate, day_of_week: dow })
+      .update({ session_date: input.newDate })
       .eq('id', input.sessionId)
       .eq('user_id', userId);
     if (error) {
       if (error.code === '23505') {
-        return { ok: false, error: 'A session already exists on this date.' };
+        return { ok: false, error: 'Já existe um treino nessa data.' };
       }
       return { ok: false, error: error.message };
     }

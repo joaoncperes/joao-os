@@ -176,15 +176,12 @@ export function WorkoutClient(props: Props) {
             disabled={pending || props.isRest || props.exercises.length === 0 || !newDate}
             onClick={() =>
               start(async () => {
-                const r = await createSessionOnDate({ date: newDate });
+                const r = await createSessionOnDate({ date: newDate, day: props.day });
                 if (!r.ok) {
                   toast.error(r.error);
                   return;
                 }
                 toast.success(`Novo treino: ${formatBR(r.data.sessionDate)}`);
-                // Jump to the weekday of the created session so the new row is visible.
-                const dow = new Date(`${r.data.sessionDate}T00:00:00Z`).getUTCDay();
-                router.push(`/workout?day=${dow}`);
                 router.refresh();
               })
             }
